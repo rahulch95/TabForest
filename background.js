@@ -109,7 +109,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
 
 			if(tab.active){
 				chrome.tabs.captureVisibleTab(tab.windowId, {format: "jpeg", quality: 10}, function(dataUrl){
-					console.log(dataUrl);
 					newPage = {
 						id: id,
 						rootId: rootId,
