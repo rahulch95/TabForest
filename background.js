@@ -107,7 +107,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
 				name = tab.title;
 			}
 
-			if(false && tab.active){
+			if(tab.active){
 				chrome.tabs.captureVisibleTab(tab.windowId, {format: "jpeg", quality: 10}, function(dataUrl){
 					console.log(dataUrl);
 					newPage = {
@@ -156,24 +156,24 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
 	}
 });
 
-// chrome.tabs.onActivated.addListener(function(activeInfo){
-// 	chrome.storage.local.get(["pages", "rootPage"], function(items){
-// 		if(items.pages){
-// 			var rootPage = JSON.parse(items.rootPage);
-// 			var pages = JSON.parse(items.pages);
-// 			var pageId;
-// 			if(rootPage[activeInfo.tabId.toString()]){
-// 				pageId = rootPage[activeInfo.tabId.toString()].toString();
-// 			} else {
-// 				return;
-// 			}
+chrome.tabs.onActivated.addListener(function(activeInfo){
+	chrome.storage.local.get(["pages", "rootPage"], function(items){
+		if(items.pages){
+			var rootPage = JSON.parse(items.rootPage);
+			var pages = JSON.parse(items.pages);
+			var pageId;
+			if(rootPage[activeInfo.tabId.toString()]){
+				pageId = rootPage[activeInfo.tabId.toString()].toString();
+			} else {
+				return;
+			}
 
-// 			if(pages[pageId] != null && pages[pageId].screenshot == ""){
-// 				chrome.tabs.captureVisibleTab(activeInfo.windowId, null, function (dataUrl){
-// 					pages[pageId].screenshot = dataUrl;
-// 					chrome.storage.local.set({"pages": JSON.stringify(pages)});
-// 				});
-// 			}
-// 		}
-// 	});
-// });
+			if(pages[pageId] != null && pages[pageId].screenshot == ""){
+				chrome.tabs.captureVisibleTab(activeInfo.windowId, null, function (dataUrl){
+					pages[pageId].screenshot = dataUrl;
+					chrome.storage.local.set({"pages": JSON.stringify(pages)});
+				});
+			}
+		}
+	});
+});
