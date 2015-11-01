@@ -7,7 +7,6 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
             return null;
         }
         if (jsonT["id"].toString() === id.toString()) {
-            console.log("found");
             return jsonT;
         }
 
@@ -20,11 +19,11 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
                 return t;
             }
         }
-        console.log("going to null");
         return null;
     }
 
     var insertInJsonTree = function(childId, parentId, allPages, sessionNumber) {
+        
         if (!parentId) {
             jsonTree["session" + sessionNumber.toString()] = {};
             jsonTree["session" + sessionNumber.toString()].id = "session" + sessionNumber.toString();
@@ -38,22 +37,12 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
         for (var i = 0; i < sessions.length; i++) {
             currentSession = sessions[i];
             parent = returnIdInJsonTree(parentId, jsonTree[currentSession.toString()]);
-            console.log("jsonTree");
-            console.log(jsonTree);
-            console.log("child Id");
-            console.log(childId);
-            console.log("parent Id");
-            console.log(parentId);
-            console.log("parent");
-            console.log(parent);
 
             if (parent) {
                 if (parent.children == [undefined]) {
                     parent.children = [allPages[child.toString()]];
                 } else {
                     parent.children.push(allPages[childId.toString()]);
-                    console.log("parent children");
-                    console.log(parent.children);
                     return sessionNumber;
                 }
             }
@@ -67,12 +56,7 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
         allPageIds = Object.keys(allPages);
         for (var i = 0; i < allPageIds.length; i++) {
             allPages[allPageIds[i]]["children"] = new Array();
-            console.log("all pages ids length");
-            console.log(allPages[allPageIds[i]]["children"].length);
         }
-        console.log(items);
-        console.log("all pages");
-        console.log(allPages);
 
         sortedPageIds = Object.keys(pageToPage).map(function(currentValue, indx, arrayy) {
             return parseInt(currentValue);});
@@ -87,12 +71,7 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
     } else {
         jsonTree = {};
     }
-    console.log(jsonTree);
-});
-// Get JSON data
-var treeJSON = d3.json("flare.json", function(error, treeData) {
-    console.log("----------");
-    console.log(jsonTree);
+    var treeJSON = d3.json("flare.json", function(error, treeData) {
     var rootNew = {
         name: "ROOT",
         children: []
@@ -104,8 +83,6 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
     }
 
     treeData = rootNew;
-    console.log("*********");
-    console.log(rootNew);
     // Calculate total nodes, max label length
     var totalNodes = 0;
     var maxLabelLength = 0;
@@ -494,7 +471,11 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
                 return d._children ? "black" : "#fff";
             });
 
-        nodeEnter.append("text")
+        nodeEnter.append("a")
+            .attr("href", function(d) {
+                return d.url;
+            }).attr("target", "_blank")
+            .append("text")
             .attr("x", function(d) {
                 return d.children || d._children ? -10 : 10;
             })
@@ -609,6 +590,8 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
         });
 
         node.on("mouseover", function(d) {
+            if (d.screenshot){
+
             d3.select("#tree-container")
                 .append("div")
                 .attr("class", "tooltip")
@@ -617,11 +600,15 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
                 .style("left", "16px")
                 .style("z-index", "550")
                 .style("visibility", "visible")
-                .text("a simple tooltip");
+                .append("img")
+                .attr("src", d.screenshot)
+                .style('width', "200px");
+            }
         }).on("mouseout", function(d){
             d3.selectAll(".tooltip").remove();
         }).on("click", function(d) {
             d3.selectAll(".tooltip").remove();
+            window.open(d.url);
         });
     }
     // Append a group which holds all nodes and which the zoom Listener can act upon.
@@ -635,4 +622,5 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
     // Layout the tree initially and center on the root node.
     update(root);
     centerNode(root);
+});
 });

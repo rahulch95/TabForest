@@ -100,8 +100,9 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
 			chrome.storage.local.set({"rootPage": JSON.stringify(rootPage)});
 
 			var name;
+			
 			if(tab.title.length > 20){
-				name = tab.title.substring(0, 20) + "...";
+				name = tab.title.substring(0, 20);
 			}
 			else {
 				name = tab.title;
