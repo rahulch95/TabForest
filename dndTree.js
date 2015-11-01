@@ -115,7 +115,7 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
     var draggingNode = null;
     // panning variables
     var panSpeed = 200;
-    var panBoundary = 20; // Within 20px from edges will pan when dragging.
+    var panBoundary = 0; // Within 20px from edges will pan when dragging.
     // Misc. variables
     var i = 0;
     var duration = 750;
@@ -410,7 +410,7 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
         scale = zoomListener.scale();
         x = -source.y0;
         y = -source.x0;
-        x = x * scale + 5;
+        x = x * scale + 100;
         y = y * scale + viewerHeight / 2;
         d3.select('g').transition()
             .duration(duration)
@@ -458,7 +458,7 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
             }
         };
         childCount(0, root);
-        var newHeight = d3.max(levelWidth) * 25; // 25 pixels per line  
+        var newHeight = d3.max(levelWidth) * 50; // 25 pixels per line  
         tree = tree.size([newHeight, viewerWidth]);
 
         // Compute the new tree layout.
@@ -467,7 +467,7 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
 
         // Set widths between levels based on maxLabelLength.
         nodes.forEach(function(d) {
-            d.y = (d.depth * (500)); //maxLabelLength * 10px
+            d.y = (d.depth * 500); //maxLabelLength * 10px
             // alternatively to keep a fixed scale one can set a fixed depth per level
             // Normalize for fixed-depth by commenting out below line
             // d.y = (d.depth * 500); //500px per level.
@@ -492,7 +492,7 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
             .attr('class', 'nodeCircle')
             .attr("r", 0)
             .style("fill", function(d) {
-                return d._children ? "lightsteelblue" : "#fff";
+                return d._children ? "black" : "#fff";
             });
 
         nodeEnter.append("text")
@@ -507,12 +507,12 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
             .text(function(d) {
                 return d.name;
             })
-            .style("fill-opacity", 0);
+            .style("fill-opacity", 0.2);
 
         // phantom node to give us mouseover in a radius around it
         nodeEnter.append("circle")
             .attr('class', 'ghostCircle')
-            .attr("r", 30)
+            .attr("r", 10)
             .attr("opacity", 0.2) // change this to zero to hide the target area
             .style("fill", "red")
             .attr('pointer-events', 'mouseover')
@@ -525,21 +525,17 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
 
         // Update the text to reflect whether node has children or not.
         node.select('text')
-            .attr("x", function(d) {
-                return d.children || d._children ? -10 : 10;
-            })
-            .attr("text-anchor", function(d) {
-                return d.children || d._children ? "end" : "start";
-            })
+            .attr("x", -20)
+            .attr("text-anchor", "end")
             .text(function(d) {
                 return d.name;
             });
 
         // Change the circle fill depending on whether it has children and is collapsed
         node.select("circle.nodeCircle")
-            .attr("r", 4.5)
+            .attr("r", 10.5)
             .style("fill", function(d) {
-                return d._children ? "lightsteelblue" : "#fff";
+                return d._children ? "black" : "#fff";
             });
 
         // Transition nodes to their new position.
