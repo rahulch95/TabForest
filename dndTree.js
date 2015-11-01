@@ -1,6 +1,112 @@
-// Get JSON data
-treeJSON = d3.json("flare.json", function(error, treeData) {
+var jsonTree = {};
 
+chrome.storage.sync.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], function(items){
+
+    var returnIdInJsonTree = function returnIdInJsonTreeR (id, jsonT) {
+        if (!jsonT) {
+            return null;
+        }
+        if (jsonT["id"].toString() === id.toString()) {
+            console.log("found");
+            return jsonT;
+        }
+
+        var children = jsonT["children"];
+
+        for(var i = 0; i < children.length; i++) {
+            var child = children[i];
+            var t = returnIdInJsonTreeR(id, child);
+            if (t) {
+                return t;
+            }
+        }
+        console.log("going to null");
+        return null;
+    }
+
+    var insertInJsonTree = function(childId, parentId, allPages, sessionNumber) {
+        if (!parentId) {
+            jsonTree["session" + sessionNumber.toString()] = {};
+            jsonTree["session" + sessionNumber.toString()].id = "session" + sessionNumber.toString();
+            jsonTree["session" + sessionNumber.toString()].children = [];
+            jsonTree["session" + sessionNumber.toString()].name = "Session " + sessionNumber.toString();
+            jsonTree["session" + sessionNumber.toString()].children.push(allPages[childId.toString()]);
+            return sessionNumber + 1;
+        }
+
+        sessions = Object.keys(jsonTree);
+        for (var i = 0; i < sessions.length; i++) {
+            currentSession = sessions[i];
+            parent = returnIdInJsonTree(parentId, jsonTree[currentSession.toString()]);
+            console.log("jsonTree");
+            console.log(jsonTree);
+            console.log("child Id");
+            console.log(childId);
+            console.log("parent Id");
+            console.log(parentId);
+            console.log("parent");
+            console.log(parent);
+
+            if (parent) {
+                if (parent.children == [undefined]) {
+                    parent.children = [allPages[child.toString()]];
+                } else {
+                    parent.children.push(allPages[childId.toString()]);
+                    console.log("parent children");
+                    console.log(parent.children);
+                    return sessionNumber;
+                }
+            }
+        }
+    }
+
+
+    if (items.pagePage && items.pages) {
+        allPages = JSON.parse(items.pages);
+        pageToPage = JSON.parse(items.pagePage);
+        allPageIds = Object.keys(allPages);
+        for (var i = 0; i < allPageIds.length; i++) {
+            allPages[allPageIds[i]]["children"] = new Array();
+            console.log("all pages ids length");
+            console.log(allPages[allPageIds[i]]["children"].length);
+        }
+        console.log(items);
+        console.log("all pages");
+        console.log(allPages);
+
+        sortedPageIds = Object.keys(pageToPage).map(function(currentValue, indx, arrayy) {
+            return parseInt(currentValue);});
+
+        var sessionNumber = 1;
+        for(var i = 0; i < sortedPageIds.length; i++) {
+            var pageId = sortedPageIds[i];
+            var parentId = pageToPage[pageId.toString()];
+            var childId = pageId.toString();
+            sessionNumber = insertInJsonTree(childId, parentId, allPages, sessionNumber);
+        }
+    } else {
+        jsonTree = {};
+    }
+    console.log(jsonTree);
+});
+// Get JSON data
+var treeJSON = d3.json("flare.json", function(error, treeData) {
+    console.log("----------");
+    console.log(treeData);
+    var rootNew = {
+        name: "ROOT",
+        children: []
+    };
+
+    sessions = Object.keys(jsonTree);
+    for(var i = 0; i < sessions.length; i++) {
+        rootNew.children.push(jsonTree[sessions[i]]);
+    }
+
+
+    treeData = rootNew;
+    console.log("*********");
+    console.log(rootNew);
     // Calculate total nodes, max label length
     var totalNodes = 0;
     var maxLabelLength = 0;
@@ -16,8 +122,8 @@ treeJSON = d3.json("flare.json", function(error, treeData) {
     var root;
 
     // size of the diagram
-    var viewerWidth = $(document).width();
-    var viewerHeight = $(document).height();
+    var viewerWidth = $(document).width() * 0.97;
+    var viewerHeight = $(document).height() * 0.965;
 
     var tree = d3.layout.tree()
         .size([viewerHeight, viewerWidth]);
@@ -304,7 +410,7 @@ treeJSON = d3.json("flare.json", function(error, treeData) {
         scale = zoomListener.scale();
         x = -source.y0;
         y = -source.x0;
-        x = x * scale + viewerWidth / 2;
+        x = x * scale + 5;
         y = y * scale + viewerHeight / 2;
         d3.select('g').transition()
             .duration(duration)
@@ -361,7 +467,7 @@ treeJSON = d3.json("flare.json", function(error, treeData) {
 
         // Set widths between levels based on maxLabelLength.
         nodes.forEach(function(d) {
-            d.y = (d.depth * (maxLabelLength * 10)); //maxLabelLength * 10px
+            d.y = (d.depth * (500)); //maxLabelLength * 10px
             // alternatively to keep a fixed scale one can set a fixed depth per level
             // Normalize for fixed-depth by commenting out below line
             // d.y = (d.depth * 500); //500px per level.
@@ -408,7 +514,7 @@ treeJSON = d3.json("flare.json", function(error, treeData) {
             .attr('class', 'ghostCircle')
             .attr("r", 30)
             .attr("opacity", 0.2) // change this to zero to hide the target area
-        .style("fill", "red")
+            .style("fill", "red")
             .attr('pointer-events', 'mouseover')
             .on("mouseover", function(node) {
                 overCircle(node);
@@ -506,25 +612,23 @@ treeJSON = d3.json("flare.json", function(error, treeData) {
             d.x0 = d.x;
             d.y0 = d.y;
         });
-        
-        node.on("mouseover", function(d){
+
+        node.on("mouseover", function(d) {
             d3.select("#tree-container")
-                    .append("div")
-                    .attr("class", "tooltip")
-                    .style("position", "absolute")
-                    .style("top", "5px")
-                    .style("left", "5px") 
-                    .style("z-index", "550")
-                    .style("visibility", "visible")
-                    .text("a simple tooltip");
-            console.log(d);
+                .append("div")
+                .attr("class", "tooltip")
+                .style("position", "absolute")
+                .style("top", "10px")
+                .style("left", "16px")
+                .style("z-index", "550")
+                .style("visibility", "visible")
+                .text("a simple tooltip");
         }).on("mouseout", function(d){
             d3.selectAll(".tooltip").remove();
-        }).on("click"), function(d) {
+        }).on("click", function(d) {
             d3.selectAll(".tooltip").remove();
-        };
+        });
     }
-    console.log(treeData);
     // Append a group which holds all nodes and which the zoom Listener can act upon.
     var svgGroup = baseSvg.append("g");
 

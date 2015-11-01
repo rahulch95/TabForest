@@ -94,9 +94,9 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
 			newPage = {
 				id: id,
 				rootId: rootId,
-				title: tab.title,
+				name: tab.title,
 				url: tab.url,
-				startTime: newDate().getTime()
+				startTime: new Date().getTime()
 			}
 
 			if(items.pages){
