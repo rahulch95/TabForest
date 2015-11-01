@@ -1,6 +1,6 @@
 var jsonTree = {};
 
-chrome.storage.sync.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], function(items){
+chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], function(items){
 
     var returnIdInJsonTree = function returnIdInJsonTreeR (id, jsonT) {
         if (!jsonT) {
@@ -92,7 +92,7 @@ chrome.storage.sync.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fun
 // Get JSON data
 var treeJSON = d3.json("flare.json", function(error, treeData) {
     console.log("----------");
-    console.log(treeData);
+    console.log(jsonTree);
     var rootNew = {
         name: "ROOT",
         children: []
@@ -102,7 +102,6 @@ var treeJSON = d3.json("flare.json", function(error, treeData) {
     for(var i = 0; i < sessions.length; i++) {
         rootNew.children.push(jsonTree[sessions[i]]);
     }
-
 
     treeData = rootNew;
     console.log("*********");

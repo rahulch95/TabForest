@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Popup</title>
+	<link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+	<style>
+		body {
+			background: #eee;
+			margin: 0;
+			font-family: 'Roboto', sans-serif;
+		}
+
+		.container {
+			margin: 0;
+			width: 180px;
+		}
+
+		ul {
+			list-style: none;
+			text-align: left;
+			margin: 0;
+			padding: 0;
+		}
+
+		li {
+			padding: 15px;
+			margin: 0;
+		}
+
+		a {
+			text-decoration: none;
+			outline: none;
+			font-size: 14px;
+		}
+
+		a li:hover {
+			background: #cde;
+		}
+
+		li p {
+			display: inline;
+			padding-left: 15px;
+			vertical-align: top;
+			color: #222;
+		}
+
+		#start {
+			display: none;
+		}
+
+	</style>
+	<script src="jquery.js"></script>
+  	<script src="popup.js"></script>
+</head>
+<body>
+	<div class="container">
+		<ul>
+			<a id="stat" href=""><li><img src="play.png" height="16" width="16"><p>Start Recording</p></li></a>
+			<a id="open" href=""><li><img src="tree.png" height="16" width="16"><p>Open Tab Forest</p></li></a>
+		</ul>
+	</div>
+
+</body>
+</html>
