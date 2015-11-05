@@ -1,3 +1,5 @@
+// using d3.js, and parts of http://bl.ocks.org/robschmuecker/7880033
+
 var jsonTree = {};
 
 chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], function(items){
@@ -23,7 +25,6 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
     }
 
     var insertInJsonTree = function(childId, parentId, allPages, sessionNumber) {
-        
         if (!parentId) {
             jsonTree["session" + sessionNumber.toString()] = {};
             jsonTree["session" + sessionNumber.toString()].id = "session" + sessionNumber.toString();
@@ -58,8 +59,7 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
             allPages[allPageIds[i]]["children"] = new Array();
         }
 
-        sortedPageIds = Object.keys(pageToPage).map(function(currentValue, indx, arrayy) {
-            return parseInt(currentValue);});
+        sortedPageIds = Object.keys(pageToPage).map(function(currentValue, indx, arrayy) {return parseInt(currentValue);});
 
         var sessionNumber = 1;
         for(var i = 0; i < sortedPageIds.length; i++) {
@@ -71,9 +71,9 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
     } else {
         jsonTree = {};
     }
-    var treeJSON = d3.json("flare.json", function(error, treeData) {
+
     var rootNew = {
-        name: "ROOT",
+        name: "Chrome",
         children: []
     };
 
@@ -96,6 +96,7 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
     var i = 0;
     var duration = 750;
     var root;
+    var dragStarted = false;
 
     // size of the diagram
     var viewerWidth = $(document).width() * 0.97;
@@ -282,33 +283,7 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
             node.attr("transform", "translate(" + d.y0 + "," + d.x0 + ")");
             updateTempConnector();
         }).on("dragend", function(d) {
-            if (d == root) {
-                return;
-            }
-            domNode = this;
-            if (selectedNode) {
-                // now remove the element from the parent, and insert it into the new elements children
-                var index = draggingNode.parent.children.indexOf(draggingNode);
-                if (index > -1) {
-                    draggingNode.parent.children.splice(index, 1);
-                }
-                if (typeof selectedNode.children !== 'undefined' || typeof selectedNode._children !== 'undefined') {
-                    if (typeof selectedNode.children !== 'undefined') {
-                        selectedNode.children.push(draggingNode);
-                    } else {
-                        selectedNode._children.push(draggingNode);
-                    }
-                } else {
-                    selectedNode.children = [];
-                    selectedNode.children.push(draggingNode);
-                }
-                // Make sure that the node being added to is expanded so user can see added node is correctly moved
-                expand(selectedNode);
-                sortTree();
-                endDrag();
-            } else {
-                endDrag();
-            }
+            endDrag();
         });
 
     function endDrag() {
@@ -443,7 +418,7 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
 
         // Set widths between levels based on maxLabelLength.
         nodes.forEach(function(d) {
-            d.y = (d.depth * 500); //maxLabelLength * 10px
+            d.y = (d.depth * 300); //maxLabelLength * 10px
             // alternatively to keep a fixed scale one can set a fixed depth per level
             // Normalize for fixed-depth by commenting out below line
             // d.y = (d.depth * 500); //500px per level.
@@ -607,8 +582,9 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
         }).on("mouseout", function(d){
             d3.selectAll(".tooltip").remove();
         }).on("click", function(d) {
-            d3.selectAll(".tooltip").remove();
+            d3.selectAll(".tooltip").remove();    
             window.open(d.url);
+            
         });
     }
     // Append a group which holds all nodes and which the zoom Listener can act upon.
@@ -622,5 +598,4 @@ chrome.storage.local.get(["id", "rootPage", "rootRoot", "pages", "pagePage"], fu
     // Layout the tree initially and center on the root node.
     update(root);
     centerNode(root);
-});
 });

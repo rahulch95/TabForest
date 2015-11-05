@@ -2,7 +2,7 @@ chrome.tabs.onCreated.addListener(function(tab){
 	var rootPage;
 	var rootRoot;
 	var rootId = tab.id;
-
+	console.log(tab);
 	chrome.storage.local.get(["id", "rootPage", "rootRoot", "stat"], function(items){
 
 		if(items.stat == "pause"){
@@ -24,10 +24,14 @@ chrome.tabs.onCreated.addListener(function(tab){
 		}
 
 		if(tab.url == "chrome://newtab/"){
+			console.log("new tab");
 			rootRoot[rootId.toString()] = null;
 		}
 		else {
+			console.log("old tab");
 			rootRoot[rootId.toString()] = tab.openerTabId;
+			console.log(tab);
+			console.log(rootRoot);
 		}
 	
 		rootPage[rootId.toString()] = null;
